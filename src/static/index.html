@@ -39,6 +39,31 @@
         </form>
         <div id="message" class="hidden"></div>
       </section>
+
+      <section id="admin-container">
+        <h3>Admin: Manage Activities</h3>
+        <form id="admin-form">
+          <div class="form-group">
+            <label for="admin-activity-name">Activity Name:</label>
+            <input type="text" id="admin-activity-name" required placeholder="Chess Club" />
+          </div>
+          <div class="form-group">
+            <label for="admin-description">Description:</label>
+            <input type="text" id="admin-description" required placeholder="Activity description" />
+          </div>
+          <div class="form-group">
+            <label for="admin-schedule">Schedule:</label>
+            <input type="text" id="admin-schedule" required placeholder="Mondays, 3:30 PM - 4:30 PM" />
+          </div>
+          <div class="form-group">
+            <label for="admin-max-participants">Max Participants:</label>
+            <input type="number" id="admin-max-participants" required min="1" value="10" />
+          </div>
+          <button type="submit" id="admin-submit-button">Add Activity</button>
+          <button type="button" id="cancel-edit" class="hidden">Cancel Edit</button>
+        </form>
+        <p class="admin-note">Use the Edit and Delete buttons on each card to manage an activity.</p>
+      </section>
     </main>
 
     <footer>
