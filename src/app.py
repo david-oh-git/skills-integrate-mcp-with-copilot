@@ -5,11 +5,13 @@ A super simple FastAPI application that allows students to view and sign up
 for extracurricular activities at Mergington High School.
 """
 
+from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 import os
 from pathlib import Path
+from pydantic import BaseModel
 
 app = FastAPI(title="Mergington High School API",
               description="API for viewing and signing up for extracurricular activities")
@@ -83,9 +85,67 @@ def root():
     return RedirectResponse(url="/static/index.html")
 
 
+class ActivityCreate(BaseModel):
+    name: str
+    description: str
+    schedule: str
+    max_participants: int
+
+
+class ActivityUpdate(BaseModel):
+    description: Optional[str] = None
+    schedule: Optional[str] = None
+    max_participants: Optional[int] = None
+
+
 @app.get("/activities")
 def get_activities():
     return activities
+
+
+@app.post("/activities")
+def create_activity(activity: ActivityCreate):
+    if activity.name in activities:
+        raise HTTPException(status_code=400, detail="Activity already exists")
+
+    activities[activity.name] = {
+        "description": activity.description,
+        "schedule": activity.schedule,
+        "max_participants": activity.max_participants,
+        "participants": []
+    }
+    return {"message": f"Activity '{activity.name}' created successfully"}
+
+
+@app.put("/activities/{activity_name}")
+def update_activity(activity_name: str, update: ActivityUpdate):
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    activity = activities[activity_name]
+
+    if update.description is not None:
+        activity["description"] = update.description
+    if update.schedule is not None:
+        activity["schedule"] = update.schedule
+    if update.max_participants is not None:
+        if update.max_participants < len(activity["participants"]):
+            raise HTTPException(
+                status_code=400,
+                detail="New max participants cannot be less than current number of participants"
+            )
+        activity["max_participants"] = update.max_participants
+
+    return {"message": f"Activity '{activity_name}' updated successfully"}
+
+
+@app.delete("/activities/{activity_name}")
+def delete_activity(activity_name: str):
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    activities.pop(activity_name)
+    return {"message": f"Activity '{activity_name}' deleted successfully"}
 
 
 @app.post("/activities/{activity_name}/signup")
